@@ -7,16 +7,15 @@ const Enmap = require("enmap");
 
 const db = new Enmap({ name: "posts" });
 
-const channels = process.env.CHANNELS.split(",");
+const channelsSrednja = process.env.CHANNELS_SREDNJA.split(",");
+const channelsOsnovna = process.env.CHANNELS_OSNOVNA.split(",");
 
 const client = new Client({
   intents: [IntentsBitField.Flags.Guilds],
 });
 
-async function getPosts() {
-  const content = await fetch("https://takprog.petlja.org/srednjaskola").then(
-    (r) => r.text()
-  );
+async function getPosts(url) {
+  const content = await fetch(url).then((r) => r.text());
 
   const $ = cheerio.load(content);
 
@@ -37,9 +36,9 @@ async function getPosts() {
   return posts.reverse();
 }
 
-async function checkPosts() {
+async function checkPosts(url, channels) {
   try {
-    const posts = await getPosts();
+    const posts = await getPosts(url);
 
     for (const post of posts) {
       if (!db.has(post)) {
@@ -67,9 +66,17 @@ async function checkPosts() {
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  checkPosts();
+  setInterval(
+    () =>
+      checkPosts("https://takprog.petlja.org/srednjaskola", channelsSrednja),
+    1000 * 60 * 5
+  );
 
-  setInterval(checkPosts, 1000 * 60 * 5);
+  setInterval(
+    () =>
+      checkPosts("https://takprog.petlja.org/osnovnaskola", channelsOsnovna),
+    1000 * 60 * 5
+  );
 });
 
 client.login();
