@@ -70,14 +70,16 @@ async function getDmsPosts(url) {
 
   const feed = await parser.parseURL(url);
 
-  return feed.items.map((item) => {
-    return {
-      title: item.title,
-      author: item.creator,
-      description: item.contentSnippet,
-      link: item.link,
-    };
-  });
+  return feed.items
+    .map((item) => {
+      return {
+        title: item.title,
+        author: item.creator,
+        description: item.contentSnippet,
+        link: item.link,
+      };
+    })
+    .reverse();
 }
 
 async function checkDmsPosts(url, channels) {
